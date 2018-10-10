@@ -1,0 +1,23 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="searchResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="search_metadata">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:float" name="completed_in"/>
+              <xs:element type="xs:byte" name="count"/>
+              <xs:element type="xs:long" name="max_id"/>
+              <xs:element type="xs:long" name="max_id_str"/>
+              <xs:element type="xs:string" name="query"/>
+              <xs:element type="xs:string" name="refresh_url"/>
+              <xs:element type="xs:long" name="since_id"/>
+              <xs:element type="xs:long" name="since_id_str"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element type="xs:string" name="statuses"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
