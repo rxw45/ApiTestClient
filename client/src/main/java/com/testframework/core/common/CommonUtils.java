@@ -7,7 +7,6 @@ import com.testframework.core.client.RestAPIClientException;
 import com.testframework.core.client.RestAPIClientRequest;
 import com.testframework.core.client.RestAPIClientWrapper;
 import com.testframework.core.model.gen.*;
-import com.testframework.core.model.gen.SearchResponse;
 
 public class CommonUtils {
 	
