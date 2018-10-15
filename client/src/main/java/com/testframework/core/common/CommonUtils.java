@@ -2,7 +2,6 @@ package com.testframework.core.common;
 
 import javax.ws.rs.core.MediaType;
 
-import com.testframework.core.client.OauthClientWrapper;
 import com.testframework.core.client.RestAPIClient;
 import com.testframework.core.client.RestAPIClientException;
 import com.testframework.core.client.RestAPIClientRequest;

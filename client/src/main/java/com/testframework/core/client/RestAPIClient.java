@@ -1,7 +1,16 @@
 package com.testframework.core.client;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
@@ -15,6 +24,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.LoggingFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
+import com.sun.jersey.client.urlconnection.HTTPSProperties;
 
 /**
  * Client is the HTTP client to invoke HTTP request to any Rest web services
@@ -87,6 +97,46 @@ public class RestAPIClient {
         client = Client.create(clientConfig);
     }
 
+	public RestAPIClient(boolean isRequestWrapped, boolean isResponseWrapped, boolean isHttps) {
+	    HostnameVerifier hostnameVerifier = HttpsURLConnection.getDefaultHostnameVerifier();
+	    ClientConfig config = new DefaultClientConfig();
+	    SSLContext ctx;
+        try {
+            ctx = SSLContext.getInstance("SSL");
+            TrustManager[] trustAllCerts = { new InsecureTrustManager() };
+            ctx.init(null, trustAllCerts, new java.security.SecureRandom());
+            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(hostnameVerifier, ctx));
+            client = Client.create(config);	    
+            ClientConfig clientConfig = RestAPIClientConfig(isRequestWrapped, isResponseWrapped);
+            client = Client.create(clientConfig);
+            client.setReadTimeout(1000 * 60);
+            client.setConnectTimeout(1000 * 60);
+        } catch (NoSuchAlgorithmException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+	    
+	 }
+	
+	  private ClientConfig RestAPIClientConfig(boolean isRequestWrapped, boolean isResponseWrapped) {
+	        ClientConfig clientConfig = new DefaultClientConfig();
+
+			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+			if (isRequestWrapped && isResponseWrapped) {
+				clientConfig.getClasses().add(TestJacksonJaxbProviderWrapped.class);
+			} else if (!isRequestWrapped && !isResponseWrapped) {
+				clientConfig.getClasses().add(TestJacksonJaxbProviderUnwrapped.class);
+				// clientConfig.getClasses().add(JacksonJsonProvider.class);
+			} else if (!isRequestWrapped) {
+				clientConfig.getClasses().add(TestJacksonJaxbProviderUnwrappedRequest.class);
+			} else {
+				clientConfig.getClasses().add(TestJacksonJaxbProviderUnwrappedResponse.class);
+			}
+	        return clientConfig;
+	    }
     /**
      * Sends request to the URL provided to invoke a service call
      * @param url - service end point
@@ -132,4 +182,30 @@ public class RestAPIClient {
         }
         return clientResponse;
     }
+    
+	public class InsecureTrustManager implements X509TrustManager {
+	    /**
+	     * {@inheritDoc}
+	     */
+	    @Override
+	    public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+	        // Everyone is trusted!
+	    }
+
+	    /**
+	     * {@inheritDoc}
+	     */
+	    @Override
+	    public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+	        // Everyone is trusted!
+	    }
+
+	    /**
+	     * {@inheritDoc}
+	     */
+	    @Override
+	    public X509Certificate[] getAcceptedIssuers() {
+	        return new X509Certificate[0];
+	    }
+	}
 }
